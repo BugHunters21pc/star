@@ -1,0 +1,428 @@
+bit stuffing and byte stuffing (BT)
+client :
+
+
+server:
+
+
+BASICS :
+server TCP :
+
+import socket
+
+host = "localhost"
+port = 4448
+
+server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+server.bind((host,port))
+server.listen(10)
+
+client, addr = server.accept()
+print(f"Connected {addr[0]}:{addr[1]}")
+
+string = client.recv(1024)
+string = string.decode('utf-8')
+print(f"Client : {string}")
+
+while True:
+    
+    inp = input("Server :")
+    client.send(bytes(inp,'utf-8'))
+    string = client.recv(1024)
+    string = string.decode('utf-8')
+    print(f"Client : {string}")
+    
+  CLIENT TCP :
+  import socket
+
+host = "localhost"
+port = 4448
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.connect((host,port))
+
+print("Connected to the server...")
+
+flag = True
+
+while flag:
+    string = input("Client :")
+    server.send(bytes(string,'utf-8'))
+    
+    buffer = server.recv(1024)
+    buffer = buffer.decode('utf-8')
+    
+    print(f"Server : {buffer}")
+    
+ SERVER UDP:
+ 
+ import socket
+
+host = "localhost"
+port = 4448
+
+addr = (host,port)
+
+server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+server.bind((host,port))
+
+data, addr = server.recvfrom(1024)
+print(f"Connected {addr[0]}:{addr[1]}")
+
+data = data.decode('utf-8')
+print(f"Client : {data}")
+
+while True:
+    
+    inp = input("Server :")
+    server.sendto(bytes(inp,'utf-8'),addr)
+    data, addr = server.recvfrom(1024)
+    string = data.decode('utf-8')
+    
+    if(string == "file"):
+        print(f"Client : {string}")
+        f = open('file.txt','rb')
+        data = f.read(1024)
+        data = str(data)
+        server.sendto(bytes(data,'utf-8'),addr)
+        print("Senting file ...")
+    else:
+        print(f"Client : {string}")
+        
+   CLIENT UDP:
+   import socket
+
+host = "localhost"
+port = 4448
+
+addr = (host,port)
+
+server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server.connect((host,port))
+
+print("Connected to the server...")
+
+flag = True
+
+while flag:
+    string = input("Client :")
+    if(string == "file"):
+        server.sendto(bytes(string,'utf-8'),addr)
+        data, addr = server.recvfrom(1024)
+        data = data.decode('utf-8') 
+        with open("file2.txt",'w+') as f:
+            f.write(data)
+            print("File recieved")
+    
+    server.sendto(bytes(string,'utf-8'),addr)
+    data, addr = server.recvfrom(1024)
+    data = data.decode('utf-8')    
+    print(f"Server : {data}")
+    
+  SERVER VIGENERE :
+  import socket
+    
+def decrypt_vigenere(data):    
+    ciphertext = data[0]
+    key = data[1]
+    plaintext = ""
+    for i in range(len(ciphertext)):
+        plaintext += chr((ord(ciphertext[i])-ord(key[i])-65)%26+65)
+    print("PLAINTEXT :",plaintext)
+
+host = "localhost"
+port = 1234
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((host,port))
+server.listen(10)
+
+client,addr = server.accept()
+data = client.recv(1024)
+data = data.decode('utf-8')
+
+data = data.split()
+    
+decrypt_vigenere(data)
+
+CLIENT VIG:
+import socket
+
+def encrypt_vigenere(data):
+    plaintext = data[0]
+    key = data[1]
+    ciphertext = ""
+    for i in range(len(plaintext)):
+        ciphertext += chr((ord(plaintext[i])+ord(key[i])-65)%26+65)
+    print("CIPHERTEXT :",ciphertext)
+    text = ciphertext +" " + data[1]
+    server.send(text.encode('utf-8'))
+
+host = "localhost"
+port = 1234
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.connect((host,port))
+
+data = input("ENTER THE TEXT KEY :")
+data = data.split()
+data[1] = (data[1] * (len(data[0])//len(data[1]) +1))[:len(data[0])]
+print(data[1])
+encrypt_vigenere(data)
+
+RSA ALGORITHM:
+
+
+import math
+# p = input("Enter p : ")
+# q = input("Enter q : ")
+
+p=13
+q=11
+n = p*q
+phi_n = (p-1)*(q-1)
+plain_text = 13
+print("plain text : ",plain_text)
+
+for i in range(1,phi_n):
+    if phi_n%i != 0:
+        e = i
+        break
+
+print(n)
+print("phi_n : ",phi_n)
+print("e : ",e)
+
+        #ENCRYPTION
+e=13      
+for i in range(2,n):
+    val = e*i
+    if (e*i)%phi_n == 1:
+        d = i
+        break
+   
+print("d : ",d)
+
+cipher_text = int(math.pow(plain_text, e))%n
+print("cipher : ",cipher_text)
+
+        #DECRYPTION
+               
+plain = int(math.pow(cipher_text, d))%n
+print("Plain text : ",plain)
+
+BYTE STUFFING SAT:
+CLIENT :
+def byte_stuffing(data, stuffing_byte):
+    stuffed_data = ""
+    for byte in data:
+        if byte == stuffing_byte:
+            stuffed_data += byte + stuffing_byte
+        else:
+            stuffed_data += byte
+    return stuffed_data
+
+def bit_stuffing(data):
+    return data.replace("11111","11110")
+
+data = "A ESC B ESC FLAG"
+flag = "01111110"
+esc = "10100011"
+
+stuffed_data = byte_stuffing(data.split(), "ESC")
+print("\nSTUFFED BYTE DATA :",stuffed_data)
+
+binary_data = ""
+for byte in stuffed_data:
+    binary_data += format(ord(byte), "08b")
+print("\nBINARY DATA :",binary_data)
+
+stuffed_bit_data = bit_stuffing(binary_data)
+print("\nBIT STUFFED DATA :",stuffed_bit_data)
+frames = [flag+stuffed_bit_data[i:i+16]+flag for i in range(0, len(stuffed_bit_data), 16)]
+print("\nFRAME :",frames)
+
+SERVER :
+def bit_unstuffing(data):
+    unstuffed_data = ""
+    count = 0
+    for bit in data:
+        if bit == "1":
+            count += 1
+            unstuffed_data += bit
+            if count == 5:
+                count = 0
+        else:
+            count = 0
+            unstuffed_data += bit
+    return unstuffed_data
+
+def byte_unstuffing(data, stuffing_byte):
+    unstuffed_data = ""
+    i = 0
+    while i < len(data):
+        if data[i] == stuffing_byte:
+            if data[i + 1] == stuffing_byte:
+                unstuffed_data += stuffing_byte
+                i += 1
+            else:
+                unstuffed_data += data[i]
+        else:
+            unstuffed_data += data[i]
+        i += 1
+    return unstuffed_data
+
+def unframe_data(frames, frame_size):
+    data = ""
+    for frame in frames:
+        data += frame[frame_size:]
+    return data
+
+frames = ['01111110010000010010000001111110', '01111110010001010101001101111110', '01111110010000110010000001111110', '01111110010000100010000001111110', '01111110010001010101001101111110', '01111110010000110010000001111110', '01111110010001100100110001111110', '01111110010000010100011101111110']
+flag = "01111110"
+
+# Remove FLAG values
+frames = [frame[8:-8] for frame in frames]
+
+# Perform bit unstuffing
+unstuffed_data = bit_unstuffing(frames)
+print(unstuffed_data)
+
+# Convert to ASCII
+unstuffed_data = byte_unstuffing(unstuffed_data, "ESC")
+original_message = ""
+for i in range(0, len(unstuffed_data), 8):
+    byte = unstuffed_data[i:i+8]
+    original_message += chr(int(byte, 2))
+print(original_message)
+
+BANK CLIENT :
+import socket,sys
+
+client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+try:
+    client.connect(("localhost",9999))
+except socket.error as e:
+    print(str(e))
+
+print("[+] connected to bank server")
+
+opt=True
+
+while opt:
+    name=input("Enter the name of your bank account :").strip(",. '/")
+    client.send(name.encode())
+    response=client.recv(1024).decode()
+    if(response=="Failed to enter the bank :("):
+        print(response)
+        client.close()
+        sys.exit()
+    print(response)
+
+    (choice,amt)=map(str,input("Enter choice and amt ([- 100]- deducts 100 and [+ 100]- adds 100) :").split())
+    #print(choice)
+
+    client.send(choice.encode())
+    client.send(amt.encode())
+
+    res=client.recv(1024).decode()
+    print(res)
+    
+SERVER FOR BANK :
+
+import socket,threading,sys
+
+server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+try:
+    server.bind(("10.1.66.254",9999))
+except socket.error as e:
+    print(str(e))
+
+print("[+] waiting for connection")
+
+def funHandle(c,addr):
+    opt=True
+    amt=0
+    print(f"[+] {addr[0]} has connected to the server")
+    while(opt):
+        name=c.recv(1024).decode()
+        l1=[]
+        f=open("bank.csv","r+")
+        for i in f.readlines():
+            if(len(i)!=0):
+                l1.append(i[0:i.index(",")])
+            
+        if(name in l1):
+            status="Success :)"
+            c.send(status.encode())
+        else:
+            status="Failed to enter the bank :("
+            c.send(status.encode())
+            sys.exit()
+        f.close()
+        
+        choice=c.recv(1024).decode()
+        amt=c.recv(1024).decode()
+        
+        print(choice,amt)
+        if(choice=="-"):
+            l=[]
+            
+            f=open("bank.csv","r")
+            l=f.readlines()
+            f.close()
+            #print(l)
+            
+            for i in range(len(l)):
+                if(l[i][0:l[i].index(",")]==name):
+                    print(l[i])
+                    l[i]=l[i].replace(l[i][l[i].index(",")+1:l[i].index("\n")],str(int(l[i][l[i].index(",")+1:])-int(amt)))
+                    rem=l[i][l[i].index(",")+1:]
+                    response=f"The amount remaining after deducting {amt} is {rem}"
+                    c.send(response.encode())
+                    break
+            #print(l)
+            f=open("bank.csv","w")
+            for i in l:
+                f.write(i)
+            f.close()
+                
+        elif(choice=="+"):
+            
+            l=[]
+            
+            f=open("bank.csv","r")
+            l=f.readlines()
+            f.close()
+            #print(l)
+            
+            for i in range(len(l)):
+                if(l[i][0:l[i].index(",")]==name):
+                    print(l[i])
+                    l[i]=l[i].replace(l[i][l[i].index(",")+1:l[i].index("\n")],str(int(l[i][l[i].index(",")+1:])+int(amt)))
+                    rem=l[i][l[i].index(",")+1:]
+                    response=f"The amount remaining after adding {amt} is {rem}"
+                    c.send(response.encode())
+                    break
+            #print(l)
+            f=open("bank.csv","w")
+            for i in l:
+                f.write(i)
+            f.close()
+
+def start():
+        server.listen(5)
+        while True:
+            c,addr=server.accept()
+            thread=threading.Thread(target=funHandle,args=(c,addr))
+            thread.start()
+
+
+start()
+
+ABOVE BANK PROB DONE IN UDP 
+DONE BY H 
+
+  
