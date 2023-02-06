@@ -553,3 +553,203 @@ def start():
 start()
 
 DONE WITH TCP
+SOCKET PROGRAMMING TCP :
+PROB 1:
+CLIENT :
+
+import socket
+cs=socket.socket()
+cs.connect(('localhost',9999))
+
+
+print('Connected to server')
+while True:
+    
+    msg1 = input("Please enter the message to the server : ")
+    cs.send(msg1.encode())
+    msg = cs.recv(1024)
+    msg = msg.decode()
+    print("Server replied:", msg,end="")
+    if msg=="Goodbye":
+        break
+cs.close()
+
+SERVER :
+
+import socket
+s=socket.socket()#Creates a new Socket
+s.bind(("localhost",9999))
+print("Server Is Listening")
+s.listen(3)
+c,addr = s.accept()
+while True:
+    
+    rep=c.recv(1024)
+    msgc=rep.decode()
+    print("Client: ",msgc)
+    if msgc=="Bye":
+        msg="Goodbye"
+        msg=msg.encode()
+        c.send(msg)
+        break
+    else:
+        msg="OK"
+        msg=msg.encode()
+        c.send(msg)
+        
+  
+c.close()
+
+P2:
+C:
+
+import socket
+cs=socket.socket()
+cs.connect(('localhost',9999))
+
+
+print('Connected to server')
+while True:
+    
+    msg1 = input("Please enter the message to the server : ")
+    cs.send(msg1.encode())
+    msg = cs.recv(1024)
+    msg = msg.decode()
+    print("Server replied:", msg,end="")
+    if msg=="Goodbye":
+        break
+cs.close()
+
+S:
+
+import socket
+s=socket.socket()#Creates a new Socket
+s.bind(("localhost",9999))
+print("Server Is Listening")
+s.listen(3)
+c,addr = s.accept()
+while True:
+    
+    rep=c.recv(1024)
+    msgc=rep.decode()
+    print("Client: ",msgc)
+    if msgc=="Bye":
+        msg="Goodbye"
+        msg=msg.encode()
+        c.send(msg)
+        break
+    else:
+        msg=msgc[::-1]
+        print('sending to client ',msg)
+        msg=msg.encode()
+        c.send(msg)
+        
+  
+c.close()
+
+P3:
+C:
+
+import socket
+cs=socket.socket()
+cs.connect(('localhost',9999))
+
+
+print('Connected to server')
+while True: 
+    msg1 = input("Please enter the message to the server : ")
+    cs.send(msg1.encode())
+    msg = cs.recv(1024)
+    msg = msg.decode()
+    print("Server replied:", msg,end="")
+    check=input("Do you want to continue (y/n):")
+    if (check=="n"):
+        break
+cs.close()
+
+S:
+
+import socket
+s=socket.socket()#Creates a new Socket
+s.bind(("localhost",9999))
+print("Server Is Listening")
+s.listen(3)
+c,addr = s.accept()
+while True:
+    rep=c.recv(1024)
+    #print(rep)
+    if rep.decode()=='':
+        break
+    msgc=rep.decode()
+    print("Client: ",msgc)
+    msg=msgc.encode()
+    c.send(msg)
+c.close()
+
+P4:
+C:
+
+import socket
+cs=socket.socket()
+cs.connect(('localhost',9999))
+
+
+print('Connected to server')
+while True: 
+    msg1 = input("Please enter the message to the server : ")
+    cs.send(msg1.encode())
+    msg = cs.recv(1024)
+    msg = msg.decode()
+    print("Server replied:", msg,end="")
+    check=input("Do you want to continue (y/n):")
+    if (check=="n"):
+        break
+cs.close()
+
+S:
+
+import socket
+s=socket.socket()#Creates a new Socket
+s.bind(("localhost",9999))
+print("Server Is Listening")
+s.listen(3)
+c,addr = s.accept()
+while True:
+    rep=c.recv(1024)
+    #print(rep)
+    if rep.decode()=='':
+        break
+    msgc=rep.decode()
+    print("Client: ",msgc)
+    msg=''
+    for i in msgc:
+        msg+=format(ord(i), '08b')+" "
+        
+    c.send(msg.encode())
+c.close()
+
+P5:
+C:
+
+import socket
+s=socket.socket()#Creates a new Socket
+s.connect(("localhost",9999))
+rep=s.recv(1024)
+msgc=rep.decode()
+print('the time got from the server',msgc)
+  
+s.close()
+
+S:
+
+from datetime import datetime
+import socket
+s=socket.socket()#Creates a new Socket
+s.bind(("localhost",9999))
+print("Server Is Listening")
+s.listen(3)
+c,addr = s.accept()
+print('Got a connection from ',addr)
+d=str(datetime.now())
+c.send(d.encode()) 
+c.close()
